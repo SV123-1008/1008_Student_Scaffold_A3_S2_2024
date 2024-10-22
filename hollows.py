@@ -12,7 +12,8 @@ from typing import List
 
 from config import Tiles
 from treasure import Treasure, generate_treasures
-
+from betterbst import BetterBST
+from data_structures.heap import MaxHeap
 
 class Hollow(ABC):
     """
@@ -83,7 +84,12 @@ class SpookyHollow(Hollow):
             Worst Case Complexity: O(n log n)
             Where n is the number of treasures in the hollow
         """
-        raise NotImplementedError
+        treasure_tree_list = []
+        for treasure in self.treasures:
+            r = -treasure.value/treasure.weight
+            treasure_tree_list.append((r,treasure))
+        
+        self.treasures = BetterBST(treasure_tree_list)
 
     def get_optimal_treasure(self, backpack_capacity: int) -> Treasure | None:
         """
@@ -112,7 +118,11 @@ class SpookyHollow(Hollow):
             Worst Case Complexity: O(n)
             n is the number of treasures in the hollow 
         """
-        raise NotImplementedError
+        
+        for treasure_node in self.treasures:
+            if treasure_node.item.weight <= backpack_capacity:
+                del self.treasure_tree[treasure_node.key]
+                return treasure_node.item
 
     def __str__(self) -> str:
         return Tiles.SPOOKY_HOLLOW.value
@@ -145,7 +155,13 @@ class MysticalHollow(Hollow):
             Worst Case Complexity: O(n)
             Where n is the number of treasures in the hollow
         """
-        raise NotImplementedError
+        treasure_tree_list = []
+        for treasure in self.treasures:
+            r = -treasure.value/treasure.weight
+            treasure_tree_list.append((r,treasure))
+        
+        self.treasures = MaxHeap(len(treasure_tree_list))
+        self.treasures.heapify(treasure_tree_list)
 
     def get_optimal_treasure(self, backpack_capacity: int) -> Treasure | None:
         """
@@ -174,7 +190,25 @@ class MysticalHollow(Hollow):
             Worst Case Complexity: O(n log n)
             Where n is the number of treasures in the hollow
         """
-        raise NotImplementedError
+        #check while iterating over self.treasure, check if the len of self.treasures is greater than 0, then MaxHeap function called get_max, while loop is running
+        #take the treasure out using self.treasure.get_max() which will return a treasure and assign a variable and check if treasure, it is a tuple so treasure[1].weight (2nd index) make sure it is less than backpack capacity
+        # if less than backpack capacity append to temp_list and return and if greater than backpack capacity append to temp_list but dont return anything
+        # after while loop go through temp_list returns None in the end
+
+        temp_list = []
+        while len(self.treasures) > 0:
+            best_treasure = self.treasures.get_max()
+             
+            if best_treasure.weight <= backpack_capacity:
+                return best_treasure
+
+            temp_list.append(best_treasure)
+
+        for treasure in temp_list:
+            self.treasures.insert(treasure)
+
+        return None
+    
 
     def __str__(self) -> str:
         return Tiles.MYSTICAL_HOLLOW.value
