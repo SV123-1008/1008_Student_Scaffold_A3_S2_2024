@@ -1,8 +1,7 @@
 from __future__ import annotations
-
 from typing import List, Tuple, TypeVar
-
 from data_structures.bst import BinarySearchTree
+from algorithms.mergesort import mergesort
 
 K = TypeVar('K')
 I = TypeVar('I')
@@ -25,8 +24,8 @@ class BetterBST(BinarySearchTree[K, I]):
             elements(List[tuple[K, I]]): The elements to be inserted into the tree.
 
         Complexity:
-            Best Case Complexity: TODO
-            Worst Case Complexity: TODO
+            Best Case Complexity: 
+            Worst Case Complexity: 
         """
         super().__init__()
         new_elements: List[Tuple[K, I]] = self.__sort_elements(elements)
@@ -45,10 +44,12 @@ class BetterBST(BinarySearchTree[K, I]):
             list(Tuple[K, I]]) - elements after being sorted.
 
         Complexity:
-            Best Case Complexity: TODO
-            Worst Case Complexity: TODO
+            Best Case Complexity: O(n * log(n))
+            Worst Case Complexity: O(n * log(n))
+            where n is the number of elements in the input / the final number of nodes in the tree.
         """
-        raise NotImplementedError
+        
+        return mergesort(elements, sort_key=lambda x: x[0])
 
     def __build_balanced_tree(self, elements: List[Tuple[K, I]]) -> None:
         """
@@ -63,15 +64,44 @@ class BetterBST(BinarySearchTree[K, I]):
         Complexity:
             (This is the actual complexity of your code, 
             remember to define all variables used.)
-            Best Case Complexity: TODO
-            Worst Case Complexity: TODO
+            Best Case Complexity: O(n * log(n))
+            Worst Case Complexity: O(n * log(n))
+            where n is the number of elements in the input / the final number of nodes in the tree.
 
         Justification:
-            TODO
+            The function constructs the fully balanced binary search tree through an efficient selection of a middle item.
+            used the first item of the sorted list as the root and then applies the same to the left and right sublists.
+            Since in a balanced tree which insertion takes O(log(n)) we are inserting n elements then total time.
+            complexity is O(n * log(n)).
 
         Complexity requirements for full marks:
             Best Case Complexity: O(n * log(n))
             Worst Case Complexity: O(n * log(n))
             where n is the number of elements in the list.
         """
-        raise NotImplementedError
+        # reset the tree
+        self.root = None
+        self.length = 0
+
+        # initialize stack for ranges
+        stack = [(0, len(elements) - 1)]
+
+        # process ranges in stack
+        while stack:
+            start, end = stack.pop()
+
+            # skip invalid ranges
+            if start > end:
+                continue
+
+            # find middle index
+            mid = (start + end) // 2
+
+            # insert middle element
+            key, item = elements[mid]
+            self[key] = item
+
+            # add right and left ranges to stack
+            stack.append((mid + 1, end))  # right side
+            stack.append((start, mid - 1))  # left side
+            
